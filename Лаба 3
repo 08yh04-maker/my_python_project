@@ -1,52 +1,40 @@
-from medium.student import Student, create_student_from_input
-from medium.shape import create_shape_from_input
-from medium.vector import create_vector_from_input
-from advanced.factory_pattern import send_notifications_interactive
-from advanced.smart_list import interactive_smart_list
+class Student:
+    def __init__(self, name, student_id, major):
+        self._name = name
+        self._student_id = student_id
+        self._major = major
+
+    def display_info(self):
+        print(f"\n=== Информация о студенте ===")
+        print(f"Студент: {self._name}")
+        print(f"ID: {self._student_id}")
+        print(f"Специальность: {self._major}")
 
 def main():
+    print("=== ЗАДАНИЕ 1: КЛАСС 'СТУДЕНТ' ===")
+    
+    students = []
+    
     while True:
-        print("\n" + "="*50)
-        print("ЛАБОРАТОРНАЯ РАБОТА №3 - ООП НА PYTHON")
-        print("="*50)
-        print("1 - Класс 'Студент'")
-        print("2 - Класс 'Фигура'")
-        print("3 - Перегрузка оператора + (Вектор)")
-        print("4 - Паттерн Factory (Уведомления)")
-        print("5 - Умный список (SmartList)")
-        print("0 - Выход")
+        print("\n--- Создание нового студента ---")
+        name = input("Введите ФИО студента: ")
+        student_id = input("Введите ID студента: ")
+        major = input("Введите специальность: ")
         
-        choice = input("Выберите задание (0-5): ").strip()
+        student = Student(name, student_id, major)
+        students.append(student)
         
-        if choice == '0':
-            print("Выход из программы...")
+        print("\n✅ Студент создан!")
+        student.display_info()
+        
+        choice = input("\nСоздать еще одного студента? (да/нет): ").lower()
+        if choice != 'да':
             break
-        elif choice == '1':
-            
-            student = create_student_from_input()
-            student.display_info()
-        elif choice == '2':
-         
-            shape = create_shape_from_input()
-            if shape:
-                print(f"Площадь: {shape.area():.2f}")
-                print(f"Периметр: {shape.perimeter():.2f}")
-        elif choice == '3':
-
-            print("Создадим два вектора для сложения:")
-            from medium.vector import Vector
-            v1 = create_vector_from_input("v1")
-            v2 = create_vector_from_input("v2")
-            v3 = v1 + v2
-            print(f"Результат: {v3}")
-        elif choice == '4':
-       
-            send_notifications_interactive()
-        elif choice == '5':
-  
-            interactive_smart_list()
-        else:
-            print("Неверный выбор!")
+    
+    print(f"\n=== ИТОГО: создано {len(students)} студентов ===")
+    for i, student in enumerate(students, 1):
+        print(f"\nСтудент #{i}:")
+        student.display_info()
 
 if __name__ == "__main__":
     main()
