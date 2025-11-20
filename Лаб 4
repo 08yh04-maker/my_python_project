@@ -304,3 +304,149 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+import time
+import datetime
+from functools import wraps
+
+def retry(max_attempts=3, delay=1, exceptions=(Exception,)):
+    """
+    Декоратор с параметрами для повторения вызовов функции при ошибках
+    
+    Args:
+        max_attempts: максимальное количество попыток
+        delay: задержка между попытками в секундах
+        exceptions: типы исключений, при которых повторять
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            
+            for attempt in range(max_attempts):
+                try:
+                    print(f"🔄 Попытка {attempt + 1} из {max_attempts}")
+                    return func(*args, **kwargs)
+                    
+                except exceptions as e:
+                    last_exception = e
+                    print(f"❌ Ошибка: {e}")
+                    
+                    # Если это не последняя попытка - ждем и повторяем
+                    if attempt < max_attempts - 1:
+                        print(f"⏳ Ожидание {delay} сек перед повторной попыткой...")
+                        time.sleep(delay)
+                    else:
+                        print("💥 Все попытки исчерпаны!")
+            
+            # Если все попытки неудачны - пробрасываем последнее исключение
+            raise last_exception
+            
+        return wrapper
+    return decorator
+
+def timer(unit='seconds'):
+    """
+    Декоратор с параметрами для измерения времени выполнения
+    
+    Args:
+        unit: единицы измерения ('seconds', 'milliseconds')
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            end_time = time.time()
+            
+            execution_time = end_time - start_time
+            if unit == 'milliseconds':
+                execution_time *= 1000
+                unit_str = 'мс'
+            else:
+                unit_str = 'сек'
+                
+            print(f"⏱️ Время выполнения: {execution_time:.4f} {unit_str}")
+            return result
+        return wrapper
+    return decorator
+
+# Примеры использования декораторов с параметрами
+
+@retry(max_attempts=3, delay=2, exceptions=(ValueError, ZeroDivisionError))
+def risky_division(a, b):
+    """Рискованное деление с возможными ошибками"""
+    if b == 0:
+        raise ZeroDivisionError("Деление на ноль!")
+    return a / b
+
+@timer(unit='milliseconds')
+def slow_operation(n):
+    """Медленная операция для демонстрации таймера"""
+    print(f"🔍 Выполняется медленная операция...")
+    time.sleep(0.5)  # Имитация медленной операции
+    return sum(range(n))
+
+@retry(max_attempts=2, delay=1)
+@timer(unit='seconds')
+def combined_example(x):
+    """Пример комбинации декораторов"""
+    if x < 0:
+        raise ValueError("Число должно быть положительным!")
+    return x ** 2
+
+def main():
+    print("=== ЗАДАНИЕ 5: ДЕКОРАТОР С ПАРАМЕТРАМИ ===")
+    print("Демонстрация параметризованных декораторов\n")
+    
+    while True:
+        print("\n" + "="*50)
+        print("Выберите демонстрацию:")
+        print("1 - Декоратор @retry (повтор при ошибках)")
+        print("2 - Декоратор @timer (измерение времени)")
+        print("3 - Комбинация декораторов")
+        print("4 - Выход")
+        
+        choice = input("Ваш выбор (1-4): ")
+        
+        if choice == '1':
+            print("\n--- Демонстрация @retry ---")
+            try:
+                a = float(input("Введите числитель: "))
+                b = float(input("Введите знаменатель: "))
+                
+                result = risky_division(a, b)
+                print(f"🎯 Результат деления: {result}")
+                
+            except Exception as e:
+                print(f"💥 Финальная ошибка: {e}")
+                
+        elif choice == '2':
+            print("\n--- Демонстрация @timer ---")
+            try:
+                n = int(input("Введите n для суммы range(n): "))
+                result = slow_operation(n)
+                print(f"🎯 Результат: {result}")
+            except ValueError:
+                print("❌ Ошибка! Введите целое число.")
+                
+        elif choice == '3':
+            print("\n--- Демонстрация комбинации @retry + @timer ---")
+            try:
+                x = float(input("Введите положительное число: "))
+                result = combined_example(x)
+                print(f"🎯 Результат: {result}")
+            except Exception as e:
+                print(f"💥 Финальная ошибка: {e}")
+                
+        elif choice == '4':
+            print("Выход из программы...")
+            break
+            
+        else:
+            print("❌ Неверный выбор!")
+
+if __name__ == "__main__":
+    main()
