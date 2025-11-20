@@ -1,52 +1,59 @@
-from medium.student import Student, create_student_from_input
-from medium.shape import create_shape_from_input
-from medium.vector import create_vector_from_input
-from advanced.factory_pattern import send_notifications_interactive
-from advanced.smart_list import interactive_smart_list
+class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __add__(self, other):
+        if isinstance(other, Vector):
+            return Vector(self.x + other.x, self.y + other.y)
+        else:
+            raise TypeError("Можно складывать только объекты Vector")
+
+    def __str__(self):
+        return f"Vector({self.x}, {self.y})"
 
 def main():
+    print("=== ЗАДАНИЕ 3: ПЕРЕГРУЗКА ОПЕРАТОРА + ===")
+    
+    print("\n--- Создание первого вектора ---")
+    x1 = float(input("Введите координату X для вектора 1: "))
+    y1 = float(input("Введите координату Y для вектора 1: "))
+    v1 = Vector(x1, y1)
+    
+    print("\n--- Создание второго вектора ---")
+    x2 = float(input("Введите координату X для вектора 2: "))
+    y2 = float(input("Введите координату Y для вектора 2: "))
+    v2 = Vector(x2, y2)
+    
+    print(f"\nВектор 1: {v1}")
+    print(f"Вектор 2: {v2}")
+    
+    # Демонстрация перегрузки оператора +
+    v3 = v1 + v2
+    print(f"\n✅ Результат сложения (v1 + v2): {v3}")
+    
+    # Дополнительные операции
     while True:
-        print("\n" + "="*50)
-        print("ЛАБОРАТОРНАЯ РАБОТА №3 - ООП НА PYTHON")
-        print("="*50)
-        print("1 - Класс 'Студент'")
-        print("2 - Класс 'Фигура'")
-        print("3 - Перегрузка оператора + (Вектор)")
-        print("4 - Паттерн Factory (Уведомления)")
-        print("5 - Умный список (SmartList)")
-        print("0 - Выход")
+        print("\n--- Дополнительные операции ---")
+        print("1 - Сложить с новым вектором")
+        print("2 - Завершить работу")
         
-        choice = input("Выберите задание (0-5): ").strip()
+        choice = input("Выберите действие (1-2): ")
         
-        if choice == '0':
-            print("Выход из программы...")
-            break
-        elif choice == '1':
+        if choice == '1':
+            print("\n--- Создание нового вектора ---")
+            x = float(input("Введите координату X: "))
+            y = float(input("Введите координату Y: "))
+            v_new = Vector(x, y)
             
-            student = create_student_from_input()
-            student.display_info()
+            v3 = v3 + v_new
+            print(f"✅ Новый результат: {v3}")
         elif choice == '2':
-         
-            shape = create_shape_from_input()
-            if shape:
-                print(f"Площадь: {shape.area():.2f}")
-                print(f"Периметр: {shape.perimeter():.2f}")
-        elif choice == '3':
-
-            print("Создадим два вектора для сложения:")
-            from medium.vector import Vector
-            v1 = create_vector_from_input("v1")
-            v2 = create_vector_from_input("v2")
-            v3 = v1 + v2
-            print(f"Результат: {v3}")
-        elif choice == '4':
-       
-            send_notifications_interactive()
-        elif choice == '5':
-  
-            interactive_smart_list()
+            break
         else:
-            print("Неверный выбор!")
+            print("❌ Неверный выбор!")
+    
+    print(f"\n=== ФИНАЛЬНЫЙ РЕЗУЛЬТАТ: {v3} ===")
 
 if __name__ == "__main__":
     main()
