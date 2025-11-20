@@ -1,52 +1,126 @@
-from medium.student import Student, create_student_from_input
-from medium.shape import create_shape_from_input
-from medium.vector import create_vector_from_input
-from advanced.factory_pattern import send_notifications_interactive
-from advanced.smart_list import interactive_smart_list
+class SmartList(list):
+    def print_elements(self):
+        if not self:
+            print("📭 Список пуст.")
+        else:
+            print(f"\n📋 Элементы списка (всего: {len(self)}):")
+            for i, item in enumerate(self):
+                print(f"  [{i}]: {item}")
+
+    def remove_duplicates(self):
+        seen = set()
+        unique_list = SmartList()
+        for item in self:
+            if item not in seen:
+                unique_list.append(item)
+                seen.add(item)
+        return unique_list
+
+    def get_first(self):
+        return self[0] if self else None
+
+    def get_last(self):
+        return self[-1] if self else None
+
+    def find_elements(self, search_term):
+        results = SmartList()
+        for item in self:
+            if str(search_term).lower() in str(item).lower():
+                results.append(item)
+        return results
 
 def main():
+    print("=== ЗАДАНИЕ 5: УМНЫЙ СПИСОК (SMARTLIST) ===")
+    
+    smart_list = SmartList()
+    
     while True:
-        print("\n" + "="*50)
-        print("ЛАБОРАТОРНАЯ РАБОТА №3 - ООП НА PYTHON")
-        print("="*50)
-        print("1 - Класс 'Студент'")
-        print("2 - Класс 'Фигура'")
-        print("3 - Перегрузка оператора + (Вектор)")
-        print("4 - Паттерн Factory (Уведомления)")
-        print("5 - Умный список (SmartList)")
-        print("0 - Выход")
+        print(f"\nТекущий список ({len(smart_list)} элементов):")
+        smart_list.print_elements()
         
-        choice = input("Выберите задание (0-5): ").strip()
+        print("\n📝 ДОСТУПНЫЕ ОПЕРАЦИИ:")
+        print("1 - Добавить элемент")
+        print("2 - Удалить элемент по индексу")
+        print("3 - Удалить дубликаты")
+        print("4 - Найти элементы")
+        print("5 - Показать первый элемент")
+        print("6 - Показать последний элемент")
+        print("7 - Очистить список")
+        print("8 - Выход")
         
-        if choice == '0':
-            print("Выход из программы...")
+        choice = input("Выберите операцию (1-8): ")
+        
+        if choice == '8':
             break
         elif choice == '1':
+            element = input("Введите элемент для добавления: ")
+            try:
+                if '.' in element:
+                    element = float(element)
+                else:
+                    element = int(element)
+            except ValueError:
+                pass
+            smart_list.append(element)
+            print(f"✅ Элемент '{element}' добавлен")
             
-            student = create_student_from_input()
-            student.display_info()
         elif choice == '2':
-         
-            shape = create_shape_from_input()
-            if shape:
-                print(f"Площадь: {shape.area():.2f}")
-                print(f"Периметр: {shape.perimeter():.2f}")
+            if smart_list:
+                try:
+                    index = int(input("Введите индекс для удаления: "))
+                    if 0 <= index < len(smart_list):
+                        removed = smart_list.pop(index)
+                        print(f"✅ Удален элемент: {removed}")
+                    else:
+                        print("❌ Неверный индекс!")
+                except ValueError:
+                    print("❌ Введите число!")
+            else:
+                print("📭 Список пуст!")
+                
         elif choice == '3':
-
-            print("Создадим два вектора для сложения:")
-            from medium.vector import Vector
-            v1 = create_vector_from_input("v1")
-            v2 = create_vector_from_input("v2")
-            v3 = v1 + v2
-            print(f"Результат: {v3}")
+            if smart_list:
+                unique_list = smart_list.remove_duplicates()
+                removed_count = len(smart_list) - len(unique_list)
+                print("✅ Список без дубликатов:")
+                unique_list.print_elements()
+                print(f"🗑️ Удалено дубликатов: {removed_count}")
+                smart_list[:] = unique_list
+            else:
+                print("📭 Список пуст!")
+                
         elif choice == '4':
-       
-            send_notifications_interactive()
+            if smart_list:
+                search_term = input("Введите значение для поиска: ")
+                results = smart_list.find_elements(search_term)
+                if results:
+                    print(f"🔍 Найдено элементов: {len(results)}")
+                    results.print_elements()
+                else:
+                    print("❌ Элементы не найдены")
+            else:
+                print("📭 Список пуст!")
+                
         elif choice == '5':
-  
-            interactive_smart_list()
+            first = smart_list.get_first()
+            print(f"📍 Первый элемент: {first}")
+            
+        elif choice == '6':
+            last = smart_list.get_last()
+            print(f"📍 Последний элемент: {last}")
+            
+        elif choice == '7':
+            if smart_list:
+                smart_list.clear()
+                print("✅ Список очищен")
+            else:
+                print("📭 Список уже пуст!")
+                
         else:
-            print("Неверный выбор!")
+            print("❌ Неверный выбор!")
+    
+    print(f"\n=== ФИНАЛЬНЫЙ СПИСОК ({len(smart_list)} элементов) ===")
+    smart_list.print_elements()
 
 if __name__ == "__main__":
     main()
