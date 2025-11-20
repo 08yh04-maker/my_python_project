@@ -1,52 +1,82 @@
-from medium.student import Student, create_student_from_input
-from medium.shape import create_shape_from_input
-from medium.vector import create_vector_from_input
-from advanced.factory_pattern import send_notifications_interactive
-from advanced.smart_list import interactive_smart_list
+from abc import ABC, abstractmethod
+
+class Notification(ABC):
+    @abstractmethod
+    def send(self, message):
+        pass
+
+class EmailNotification(Notification):
+    def send(self, message):
+        return f"📧 Email отправлен: '{message}'"
+
+class SMSNotification(Notification):
+    def send(self, message):
+        return f"📱 SMS отправлено: '{message}'"
+
+class PushNotification(Notification):
+    def send(self, message):
+        return f"🔔 Push-уведомление отправлено: '{message}'"
+
+class NotificationFactory:
+    @staticmethod
+    def create_notification(notification_type):
+        if notification_type == "email":
+            return EmailNotification()
+        elif notification_type == "sms":
+            return SMSNotification()
+        elif notification_type == "push":
+            return PushNotification()
+        else:
+            raise ValueError(f"Неизвестный тип уведомления: {notification_type}")
 
 def main():
+    print("=== ЗАДАНИЕ 4: ПАТТЕРН FACTORY ===")
+    
+    notifications = []
+    
     while True:
-        print("\n" + "="*50)
-        print("ЛАБОРАТОРНАЯ РАБОТА №3 - ООП НА PYTHON")
-        print("="*50)
-        print("1 - Класс 'Студент'")
-        print("2 - Класс 'Фигура'")
-        print("3 - Перегрузка оператора + (Вектор)")
-        print("4 - Паттерн Factory (Уведомления)")
-        print("5 - Умный список (SmartList)")
-        print("0 - Выход")
+        print("\n" + "="*40)
+        print("СИСТЕМА УВЕДОМЛЕНИЙ")
+        print("="*40)
+        print("1 - Отправить Email")
+        print("2 - Отправить SMS")
+        print("3 - Отправить Push-уведомление")
+        print("4 - Показать историю отправок")
+        print("5 - Выход")
         
-        choice = input("Выберите задание (0-5): ").strip()
+        choice = input("Выберите действие (1-5): ")
         
-        if choice == '0':
-            print("Выход из программы...")
+        if choice == '5':
             break
-        elif choice == '1':
-            
-            student = create_student_from_input()
-            student.display_info()
-        elif choice == '2':
-         
-            shape = create_shape_from_input()
-            if shape:
-                print(f"Площадь: {shape.area():.2f}")
-                print(f"Периметр: {shape.perimeter():.2f}")
-        elif choice == '3':
-
-            print("Создадим два вектора для сложения:")
-            from medium.vector import Vector
-            v1 = create_vector_from_input("v1")
-            v2 = create_vector_from_input("v2")
-            v3 = v1 + v2
-            print(f"Результат: {v3}")
         elif choice == '4':
-       
-            send_notifications_interactive()
-        elif choice == '5':
-  
-            interactive_smart_list()
+            if notifications:
+                print("\n📋 ИСТОРИЯ ОТПРАВОК:")
+                for i, notif in enumerate(notifications, 1):
+                    print(f"{i}. {notif}")
+            else:
+                print("📭 История отправок пуста.")
+            continue
+        
+        if choice in ['1', '2', '3']:
+            message = input("Введите сообщение для отправки: ")
+            
+            notification_types = {
+                '1': 'email',
+                '2': 'sms', 
+                '3': 'push'
+            }
+            
+            try:
+                notification = NotificationFactory.create_notification(notification_types[choice])
+                result = notification.send(message)
+                notifications.append(result)
+                print(f"✅ {result}")
+            except ValueError as e:
+                print(f"❌ {e}")
         else:
-            print("Неверный выбор!")
+            print("❌ Неверный выбор!")
+    
+    print(f"\n=== ИТОГО: отправлено {len(notifications)} уведомлений ===")
 
 if __name__ == "__main__":
     main()
