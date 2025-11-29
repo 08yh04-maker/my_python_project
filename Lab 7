@@ -250,3 +250,155 @@ def demonstrate_crud():
     crud.close()
 
 
+import psycopg2
+from psycopg2 import sql
+
+class PostgreSQLManager:
+    def __init__(self, dbname='company', user='postgres', password='password', host='localhost'):
+        self.conn_params = {
+            'dbname': dbname,
+            'user': user,
+            'password': password,
+            'host': host
+        }
+        self.connection = None
+    
+    def connect(self):
+        try:
+            self.connection = psycopg2.connect(**self.conn_params)
+            print("Успешное подключение к PostgreSQL!")
+            return True
+        except Exception as e:
+            print(f"Ошибка подключения: {e}")
+            return False
+    
+    def create_tables(self):
+        if not self.connection:
+            print("Нет подключения к БД")
+            return
+        
+        cursor = self.connection.cursor()
+        
+        # Создание таблицы projects
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS projects (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                budget DECIMAL(10,2),
+                start_date DATE,
+                status VARCHAR(20) DEFAULT 'active'
+            )
+        ''')
+        
+        # Создание таблицы project_assignments
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS project_assignments (
+                id SERIAL PRIMARY KEY,
+                employee_id INTEGER,
+                project_id INTEGER,
+                role VARCHAR(50),
+                hours_per_week INTEGER,
+                assignment_date DATE DEFAULT CURRENT_DATE
+            )
+        ''')
+        
+        self.connection.commit()
+        cursor.close()
+        print("Таблицы в PostgreSQL созданы успешно!")
+    
+    def insert_sample_data(self):
+        cursor = self.connection.cursor()
+        
+        # Вставка проектов
+        projects = [
+            ('Разработка нового сайта', 100000, '2024-01-15'),
+            ('Внедрение CRM системы', 150000, '2024-02-01'),
+            ('Аналитика продаж', 50000, '2024-01-20')
+        ]
+        
+        for project in projects:
+            cursor.execute(
+                'INSERT INTO projects (name, budget, start_date) VALUES (%s, %s, %s)',
+                project
+            )
+        
+        # Вставка назначений на проекты
+        assignments = [
+            (1, 1, 'Техлид', 20),
+            (3, 1, 'Разработчик', 40),
+            (1, 2, 'Архитектор', 15),
+            (3, 3, 'Аналитик', 25)
+        ]
+        
+        for assignment in assignments:
+            cursor.execute(
+                'INSERT INTO project_assignments (employee_id, project_id, role, hours_per_week) VALUES (%s, %s, %s, %s)',
+                assignment
+            )
+        
+        self.connection.commit()
+        cursor.close()
+        print("Данные в PostgreSQL вставлены успешно!")
+    
+    def complex_query(self):
+        cursor = self.connection.cursor()
+        
+        # Сложный запрос с JOIN и агрегацией
+        cursor.execute('''
+            SELECT 
+                p.name as project_name,
+                p.budget,
+                COUNT(pa.employee_id) as team_size,
+                SUM(pa.hours_per_week) as total_hours
+            FROM projects p
+            LEFT JOIN project_assignments pa ON p.id = pa.project_id
+            GROUP BY p.id, p.name, p.budget
+            ORDER BY p.budget DESC
+        ''')
+        
+        print("\n--- Статистика по проектам (PostgreSQL) ---")
+        for row in cursor.fetchall():
+            print(f"Проект: {row[0]}, Бюджет: {row[1]}, Команда: {row[2]} чел., Часы: {row[3]}/нед.")
+        
+        cursor.close()
+    
+    def close(self):
+        if self.connection:
+            self.connection.close()
+            print("Подключение к PostgreSQL закрыто")
+
+def demonstrate_postgresql():
+    print("\n=== РАБОТА С POSTGRESQL ===")
+    
+    # Замените параметры подключения на свои
+    pg_manager = PostgreSQLManager(
+        dbname='company',
+        user='your_username',
+        password='your_password',
+        host='localhost'
+    )
+    
+    if pg_manager.connect():
+        pg_manager.create_tables()
+        pg_manager.insert_sample_data()
+        pg_manager.complex_query()
+        pg_manager.close()
+
+# Главная функция
+def main():
+    print("ЛАБОРАТОРНАЯ РАБОТА №7 - ВАРИАНТ 2")
+    print("=" * 50)
+    
+    # Задания средней сложности
+    medium_level()
+    
+    # Задания повышенной сложности
+    demonstrate_crud()
+    
+    # Работа с PostgreSQL (раскомментируйте когда настроите PostgreSQL)
+    # demonstrate_postgresql()
+    
+    print("\nВсе задания выполнены!")
+
+if __name__ == "__main__":
+    main()
