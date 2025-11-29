@@ -111,3 +111,142 @@ def medium_level():
     insert_data()
     update_employee()
     check_results()
+
+
+from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
+
+Base = declarative_base()
+
+# Модели для ORM
+class Department(Base):
+    __tablename__ = 'departments_orm'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    budget = Column(Float)
+    
+    employees = relationship("Employee", back_populates="department")
+    
+    def __repr__(self):
+        return f"<Department(id={self.id}, name='{self.name}', budget={self.budget})>"
+
+class Employee(Base):
+    __tablename__ = 'employees_orm'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    position = Column(String(100))
+    salary = Column(Float)
+    department_id = Column(Integer, ForeignKey('departments_orm.id'))
+    
+    department = relationship("Department", back_populates="employees")
+    
+    def __repr__(self):
+        return f"<Employee(id={self.id}, name='{self.name}', position='{self.position}')>"
+
+# CRUD операции через ORM
+class CompanyCRUD:
+    def __init__(self, db_url='sqlite:///company_orm.db'):
+        self.engine = create_engine(db_url)
+        Base.metadata.create_all(self.engine)
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()
+    
+    # CREATE
+    def create_department(self, name, budget):
+        department = Department(name=name, budget=budget)
+        self.session.add(department)
+        self.session.commit()
+        return department
+    
+    def create_employee(self, name, position, salary, department_id):
+        employee = Employee(
+            name=name, 
+            position=position, 
+            salary=salary, 
+            department_id=department_id
+        )
+        self.session.add(employee)
+        self.session.commit()
+        return employee
+    
+    # READ
+    def get_all_employees(self):
+        return self.session.query(Employee).all()
+    
+    def get_employee_by_id(self, employee_id):
+        return self.session.query(Employee).filter(Employee.id == employee_id).first()
+    
+    def get_employees_by_department(self, department_name):
+        return self.session.query(Employee).join(Department).filter(
+            Department.name == department_name
+        ).all()
+    
+    # UPDATE
+    def update_employee_salary(self, employee_id, new_salary):
+        employee = self.get_employee_by_id(employee_id)
+        if employee:
+            employee.salary = new_salary
+            self.session.commit()
+            return True
+        return False
+    
+    def update_employee_position(self, employee_id, new_position):
+        employee = self.get_employee_by_id(employee_id)
+        if employee:
+            employee.position = new_position
+            self.session.commit()
+            return True
+        return False
+    
+    # DELETE
+    def delete_employee(self, employee_id):
+        employee = self.get_employee_by_id(employee_id)
+        if employee:
+            self.session.delete(employee)
+            self.session.commit()
+            return True
+        return False
+    
+    def close(self):
+        self.session.close()
+
+# Демонстрация CRUD операций
+def demonstrate_crud():
+    print("\n=== CRUD ЧЕРЕЗ ORM ===")
+    crud = CompanyCRUD()
+    
+    # Создание отделов
+    it_dept = crud.create_department("IT Development", 75000)
+    hr_dept = crud.create_department("Human Resources", 45000)
+    
+    # Создание сотрудников
+    emp1 = crud.create_employee("Сергей Иванов", "Team Lead", 120000, it_dept.id)
+    emp2 = crud.create_employee("Ольга Смирнова", "HR Manager", 65000, hr_dept.id)
+    emp3 = crud.create_employee("Павел Козлов", "Backend Developer", 90000, it_dept.id)
+    
+    # Чтение данных
+    print("\n--- Все сотрудники ---")
+    employees = crud.get_all_employees()
+    for emp in employees:
+        print(f"{emp.name} - {emp.position} - {emp.salary} руб.")
+    
+    # Обновление данных
+    print("\n--- Обновление зарплаты ---")
+    crud.update_employee_salary(emp3.id, 95000)
+    updated_emp = crud.get_employee_by_id(emp3.id)
+    print(f"Обновленная зарплата: {updated_emp.name} - {updated_emp.salary} руб.")
+    
+    # Удаление сотрудника
+    print("\n--- Удаление сотрудника ---")
+    crud.delete_employee(emp2.id)
+    remaining_employees = crud.get_all_employees()
+    print("Оставшиеся сотрудники:")
+    for emp in remaining_employees:
+        print(f"{emp.name} - {emp.position}")
+    
+    crud.close()
+
+
