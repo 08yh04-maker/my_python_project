@@ -78,3 +78,11 @@ class Calculator:
         result = a / b
         logger.debug(f"Dividing {a} / {b} = {result}")
         return result
+
+def multiply(self, a: float, b: float) -> float:
+    """Return the product of a and b."""
+    result = a * b
+    logger.debug(f"Multiplying {a} * {b} = {result}")
+    return result
+
+poetry run pytest -v
