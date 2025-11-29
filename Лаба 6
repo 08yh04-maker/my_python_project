@@ -26,3 +26,18 @@ def greet():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Форма приветствия</title>
+</head>
+<body>
+    <h1>Введите ваше имя</h1>
+    <form action="/greet" method="post">
+        <input type="text" name="name" placeholder="Ваше имя" required>
+        <button type="submit">Приветствовать</button>
+    </form>
+</body>
+</html>
