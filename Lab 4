@@ -1,0 +1,27 @@
+def main():
+    print("=== ЗАДАНИЕ 1: ФИЛЬТРАЦИЯ ЧЁТНЫХ ЧИСЕЛ ===")
+    print("Функциональный стиль: filter() + lambda\n")
+    
+    # Ввод данных от пользователя
+    input_str = input("Введите числа через пробел: ")
+    
+    try:
+        # Преобразуем ввод в список чисел
+        numbers = list(map(int, input_str.split()))
+        
+        print(f"\nИсходный список: {numbers}")
+        
+        # Функциональный стиль: фильтрация чётных чисел
+        even_numbers = list(filter(lambda x: x % 2 == 0, numbers))
+        
+        print(f"Чётные числа: {even_numbers}")
+        
+        # Дополнительно: обычный способ для сравнения
+        even_traditional = [x for x in numbers if x % 2 == 0]
+        print(f"Проверка (обычный способ): {even_traditional}")
+        
+    except ValueError:
+        print("❌ Ошибка! Вводите только числа, разделенные пробелами.")
+
+if __name__ == "__main__":
+    main()
