@@ -99,3 +99,28 @@ logging.basicConfig(
         logging.StreamHandler()          # Логи в консоль
     ]
 )
+
+# Используем официальный легкий образ Python
+FROM python:3.11-slim
+
+# Устанавливаем рабочую директорию в контейнере
+WORKDIR /app
+
+# Копируем файлы проекта в контейнер
+COPY pyproject.toml poetry.lock* /app/
+
+# Устанавливаем Poetry
+RUN pip install --no-cache-dir poetry
+
+# Настраиваем Poetry для установки зависимостей в системную директорию (без виртуального окружения внутри контейнера)
+RUN poetry config virtualenvs.create false
+
+# Устанавливаем зависимости проекта
+RUN poetry install --no-dev --no-interaction --no-ansi
+
+# Копируем исходный код
+COPY lab8_variant2/ /app/lab8_variant2/
+COPY tests/ /app/tests/
+
+# Команда по умолчанию: запуск тестов
+CMD ["poetry", "run", "pytest", "-v"]
