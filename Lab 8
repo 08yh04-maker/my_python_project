@@ -86,3 +86,16 @@ def multiply(self, a: float, b: float) -> float:
     return result
 
 poetry run pytest -v
+
+# lab8_variant2/__init__.py
+import logging
+
+# Базовая настройка логирования для всего пакета
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("app.log"),  # Логи в файл
+        logging.StreamHandler()          # Логи в консоль
+    ]
+)
