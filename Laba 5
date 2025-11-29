@@ -153,3 +153,96 @@ content_label = tk.Label(root, text="Добро пожаловать в прог
 content_label.pack(expand=True)
 
 root.mainloop()
+
+import tkinter as tk
+from tkinter import ttk
+
+class DrawingApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Рисование фигур")
+        self.root.geometry("600x500")
+        
+        # Переменные
+        self.shape_var = tk.StringVar(value="rectangle")
+        self.start_x = None
+        self.start_y = None
+        self.current_shape = None
+        self.shapes = []
+        
+        self.setup_ui()
+        
+    def setup_ui(self):
+        # Панель инструментов
+        toolbar = tk.Frame(self.root, bg="lightgray")
+        toolbar.pack(side=tk.TOP, fill=tk.X)
+        
+        # Выбор фигуры
+        shape_label = tk.Label(toolbar, text="Фигура:")
+        shape_label.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        shapes = [("Прямоугольник", "rectangle"), 
+                 ("Овал", "oval"), 
+                 ("Линия", "line")]
+        
+        for text, value in shapes:
+            rb = tk.Radiobutton(toolbar, text=text, variable=self.shape_var, 
+                               value=value)
+            rb.pack(side=tk.LEFT, padx=5)
+        
+        # Кнопка очистки
+        clear_btn = tk.Button(toolbar, text="Очистить", command=self.clear_canvas)
+        clear_btn.pack(side=tk.RIGHT, padx=5, pady=5)
+        
+        # Холст для рисования
+        self.canvas = tk.Canvas(self.root, bg="white", cursor="cross")
+        self.canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Привязка событий мыши
+        self.canvas.bind("<Button-1>", self.on_press)
+        self.canvas.bind("<B1-Motion>", self.on_drag)
+        self.canvas.bind("<ButtonRelease-1>", self.on_release)
+    
+    def on_press(self, event):
+        self.start_x = event.x
+        self.start_y = event.y
+        
+        shape_type = self.shape_var.get()
+        if shape_type == "rectangle":
+            self.current_shape = self.canvas.create_rectangle(
+                self.start_x, self.start_y, self.start_x, self.start_y,
+                outline="black", width=2
+            )
+        elif shape_type == "oval":
+            self.current_shape = self.canvas.create_oval(
+                self.start_x, self.start_y, self.start_x, self.start_y,
+                outline="black", width=2
+            )
+        elif shape_type == "line":
+            self.current_shape = self.canvas.create_line(
+                self.start_x, self.start_y, self.start_x, self.start_y,
+                fill="black", width=2
+            )
+    
+    def on_drag(self, event):
+        if self.current_shape:
+            shape_type = self.shape_var.get()
+            if shape_type in ["rectangle", "oval"]:
+                self.canvas.coords(self.current_shape, 
+                                 self.start_x, self.start_y, event.x, event.y)
+            elif shape_type == "line":
+                self.canvas.coords(self.current_shape,
+                                 self.start_x, self.start_y, event.x, event.y)
+    
+    def on_release(self, event):
+        self.shapes.append(self.current_shape)
+        self.current_shape = None
+    
+    def clear_canvas(self):
+        self.canvas.delete("all")
+        self.shapes = []
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DrawingApp(root)
+    root.mainloop()
