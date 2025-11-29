@@ -70,3 +70,46 @@ button = tk.Button(root, text="Показать выбор", command=show_select
 button.pack(pady=10)
 
 root.mainloop()
+
+import tkinter as tk
+from tkinter import messagebox
+
+def show_selection():
+    selection = listbox.curselection()
+    if selection:
+        index = selection[0]
+        item = listbox.get(index)
+        messagebox.showinfo("Выбор", f"Вы выбрали: {item}")
+    else:
+        messagebox.showwarning("Ошибка", "Пожалуйста, выберите элемент из списка")
+
+root = tk.Tk()
+root.title("Listbox пример")
+root.geometry("300x250")
+
+# Метка
+label = tk.Label(root, text="Выберите элемент из списка:")
+label.pack(pady=10)
+
+# Listbox с прокруткой
+frame = tk.Frame(root)
+frame.pack(pady=10)
+
+scrollbar = tk.Scrollbar(frame)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+listbox = tk.Listbox(frame, yscrollcommand=scrollbar.set, height=8)
+listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+
+scrollbar.config(command=listbox.yview)
+
+# Добавляем элементы в список
+items = ["Python", "Java", "C++", "JavaScript", "C#", "PHP", "Ruby", "Go", "Swift", "Kotlin"]
+for item in items:
+    listbox.insert(tk.END, item)
+
+# Кнопка
+button = tk.Button(root, text="Показать выбор", command=show_selection)
+button.pack(pady=10)
+
+root.mainloop()
