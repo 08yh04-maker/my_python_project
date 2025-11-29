@@ -246,3 +246,112 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = DrawingApp(root)
     root.mainloop()
+
+import tkinter as tk
+from tkinter import ttk
+import requests
+import json
+
+class CurrencyConverter:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Конвертер валют")
+        self.root.geometry("400x300")
+        
+        # Курсы валют (можно заменить на реальный API)
+        self.exchange_rates = {
+            'USD': 1.0,
+            'EUR': 0.85,
+            'RUB': 75.0,
+            'GBP': 0.73,
+            'JPY': 110.0,
+            'CNY': 6.45
+        }
+        
+        self.setup_ui()
+        
+    def setup_ui(self):
+        # Заголовок
+        title_label = tk.Label(self.root, text="Конвертер валют", 
+                              font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+        
+        # Фрейм для ввода суммы
+        amount_frame = tk.Frame(self.root)
+        amount_frame.pack(pady=10)
+        
+        tk.Label(amount_frame, text="Сумма:").pack(side=tk.LEFT)
+        self.amount_var = tk.StringVar(value="1.0")
+        self.amount_entry = tk.Entry(amount_frame, textvariable=self.amount_var, width=15)
+        self.amount_entry.pack(side=tk.LEFT, padx=5)
+        
+        # Фрейм для выбора валют
+        currency_frame = tk.Frame(self.root)
+        currency_frame.pack(pady=10)
+        
+        # Исходная валюта
+        from_frame = tk.Frame(currency_frame)
+        from_frame.pack(side=tk.LEFT, padx=20)
+        
+        tk.Label(from_frame, text="Из:").pack()
+        self.from_currency = ttk.Combobox(from_frame, 
+                                         values=list(self.exchange_rates.keys()),
+                                         state="readonly",
+                                         width=10)
+        self.from_currency.set('USD')
+        self.from_currency.pack(pady=5)
+        
+        # Стрелка
+        arrow_label = tk.Label(currency_frame, text="→", font=("Arial", 16))
+        arrow_label.pack(side=tk.LEFT, padx=10)
+        
+        # Целевая валюта
+        to_frame = tk.Frame(currency_frame)
+        to_frame.pack(side=tk.LEFT, padx=20)
+        
+        tk.Label(to_frame, text="В:").pack()
+        self.to_currency = ttk.Combobox(to_frame, 
+                                       values=list(self.exchange_rates.keys()),
+                                       state="readonly",
+                                       width=10)
+        self.to_currency.set('EUR')
+        self.to_currency.pack(pady=5)
+        
+        # Кнопка конвертации
+        convert_btn = tk.Button(self.root, text="Конвертировать", 
+                               command=self.convert_currency,
+                               bg="lightblue")
+        convert_btn.pack(pady=10)
+        
+        # Результат
+        self.result_var = tk.StringVar(value="Результат появится здесь")
+        result_label = tk.Label(self.root, textvariable=self.result_var,
+                               font=("Arial", 12), fg="blue")
+        result_label.pack(pady=10)
+        
+        # Информация о курсах
+        rates_info = "Доступные валюты: " + ", ".join(self.exchange_rates.keys())
+        info_label = tk.Label(self.root, text=rates_info, font=("Arial", 8))
+        info_label.pack(side=tk.BOTTOM, pady=5)
+    
+    def convert_currency(self):
+        try:
+            amount = float(self.amount_var.get())
+            from_curr = self.from_currency.get()
+            to_curr = self.to_currency.get()
+            
+            # Конвертация через USD как базовую валюту
+            amount_in_usd = amount / self.exchange_rates[from_curr]
+            result = amount_in_usd * self.exchange_rates[to_curr]
+            
+            self.result_var.set(f"{amount:.2f} {from_curr} = {result:.2f} {to_curr}")
+            
+        except ValueError:
+            self.result_var.set("Ошибка: введите корректное число")
+        except KeyError:
+            self.result_var.set("Ошибка: выберите валюту из списка")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    converter = CurrencyConverter(root)
+    root.mainloop()
