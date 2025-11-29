@@ -1,5 +1,28 @@
 import tkinter as tk
 from tkinter import messagebox
 
+def show_text():
+    text = entry.get()
+    if text:
+        messagebox.showinfo("Введенный текст", f"Вы ввели: {text}")
+    else:
+        messagebox.showwarning("Ошибка", "Пожалуйста, введите текст")
+
+root = tk.Tk()
+root.title("Текстовый ввод")
+root.geometry("300x150")
+
+# Метка
+label = tk.Label(root, text="Введите текст:")
+label.pack(pady=10)
+
+# Текстовое поле
+entry = tk.Entry(root, width=30)
+entry.pack(pady=5)
+
+# Кнопка
+button = tk.Button(root, text="Показать текст", command=show_text)
+button.pack(pady=10)
+
 
 root.mainloop()
