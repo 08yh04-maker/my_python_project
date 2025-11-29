@@ -43,3 +43,38 @@ class TestCalculator:
         logger.warning("Testing division by zero, expecting ValueError")
         with pytest.raises(ValueError, match="Cannot divide by zero"):
             calc.divide(5, 0)
+
+
+import logging
+
+# Настройка логирования для модуля калькулятора
+logger = logging.getLogger(__name__)
+
+class Calculator:
+    """A simple calculator class."""
+
+    def add(self, a: float, b: float) -> float:
+        """Return the sum of a and b."""
+        result = a + b
+        logger.debug(f"Adding {a} + {b} = {result}")
+        return result
+
+    def subtract(self, a: float, b: float) -> float:
+        """Return the difference of a and b."""
+        result = a - b
+        logger.debug(f"Subtracting {a} - {b} = {result}")
+        return result
+
+    def multiply(self, a: float, b: float) -> float:
+        """Return the product of a and b."""
+        # Пока заглушка. Мы реализуем это после написания теста.
+        raise NotImplementedError("Multiply method not implemented yet.")
+
+    def divide(self, a: float, b: float) -> float:
+        """Return the quotient of a and b."""
+        if b == 0:
+            logger.error("Attempted division by zero")
+            raise ValueError("Cannot divide by zero")
+        result = a / b
+        logger.debug(f"Dividing {a} / {b} = {result}")
+        return result
