@@ -1,0 +1,45 @@
+import pytest
+import logging
+from lab8_variant2.calculator import Calculator
+
+# Настраиваем логирование в тестах
+logger = logging.getLogger(__name__)
+
+class TestCalculator:
+    """Test suite for the Calculator class."""
+
+    def test_add(self):
+        """Test addition operation."""
+        calc = Calculator()
+        logger.info("Testing addition: 2 + 3")
+        result = calc.add(2, 3)
+        assert result == 5, f"Expected 5, but got {result}"
+
+    def test_subtract(self):
+        """Test subtraction operation."""
+        calc = Calculator()
+        logger.info("Testing subtraction: 5 - 3")
+        result = calc.subtract(5, 3)
+        assert result == 2, f"Expected 2, but got {result}"
+
+    # Тест для метода, который мы создадим позже (TDD)
+    def test_multiply(self):
+        """Test multiplication operation."""
+        calc = Calculator()
+        logger.info("Testing multiplication: 3 * 4")
+        result = calc.multiply(3, 4)
+        assert result == 12, f"Expected 12, but got {result}"
+
+    def test_divide(self):
+        """Test division operation."""
+        calc = Calculator()
+        logger.info("Testing division: 8 / 2")
+        result = calc.divide(8, 2)
+        assert result == 4, f"Expected 4, but got {result}"
+
+    def test_divide_by_zero(self):
+        """Test division by zero raises ValueError."""
+        calc = Calculator()
+        logger.warning("Testing division by zero, expecting ValueError")
+        with pytest.raises(ValueError, match="Cannot divide by zero"):
+            calc.divide(5, 0)
