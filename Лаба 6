@@ -151,3 +151,95 @@ def delete_user(user_id: int):
         conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
         conn.commit()
         return {"message": "Пользователь удален"}
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+import json
+
+app = FastAPI()
+
+# HTML страница для чата
+html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+</head>
+<body>
+    <h1>WebSocket Chat</h1>
+    <div id="messages" style="border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px;"></div>
+    <input type="text" id="messageText" placeholder="Введите сообщение" style="width: 300px;">
+    <button onclick="sendMessage()">Отправить</button>
+    
+    <script>
+        var ws = new WebSocket("ws://localhost:8000/ws");
+        var messages = document.getElementById('messages');
+        
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+            var message = document.createElement('div');
+            message.innerHTML = '<strong>' + data.username + ':</strong> ' + data.message;
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;
+        };
+        
+        function sendMessage() {
+            var input = document.getElementById('messageText');
+            var message = input.value;
+            if (message) {
+                ws.send(JSON.stringify({
+                    "username": "User",
+                    "message": message
+                }));
+                input.value = '';
+            }
+        }
+        
+        document.getElementById('messageText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
+"""
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections = []
+    
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+    
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+    
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+    
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+
+@app.get("/")
+async def get():
+    return HTMLResponse(html)
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            await manager.broadcast(json.dumps({
+                "username": message_data["username"],
+                "message": message_data["message"]
+            }))
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast("Пользователь покинул чат")
